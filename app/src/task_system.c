@@ -74,10 +74,10 @@
 
 
 
-#define EV_NO_EVENT -1
+//#define EV_NO_EVENT -1
 /********************** internal data declaration ****************************/
 task_system_dta_t task_system_dta =
-	{DEL_SYST_MIN, 10, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN_WAITING_TIME, DEL_SYST_MIN, ST_SYST_IDLE, ST_SETUP_INIT_MENU, EV_SYST_CTRL_OFF, false};
+	{DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN_WAITING_TIME, DEL_SYST_MIN, ST_SYST_IDLE, ST_SETUP_INIT_MENU, EV_SYST_CTRL_OFF, false};
 
 #define SYSTEM_DTA_QTY	(sizeof(task_system_dta)/sizeof(task_system_dta_t))
 
@@ -187,7 +187,7 @@ void task_system_update(void *parameters) {
 						p_task_system_dta->state = ST_SYST_CTRL;
 						p_task_system_dta->qty_packs = DEL_SYST_MIN;
 						p_task_system_dta->speed = DEL_SYST_INIT_SPEED;
-						p_task_system_dta->pack_rate = 2;
+						p_task_system_dta->pack_rate = DEL_SYST_INIT_PCS;
 						p_task_system_dta->waiting_time = DEL_SYST_INIT_WAITING_TIME;
 						p_task_system_dta->tick = DEL_SYST_MIN;
 					}
@@ -225,7 +225,7 @@ void task_system_update(void *parameters) {
 				            if (p_task_system_dta->speed > DEL_SYST_MIN_SPEED && ((int)p_task_system_dta->qty_packs % (int)p_task_system_dta->pack_rate == 0)) {
 				                p_task_system_dta->speed--;
 				                LOGGER_LOG("DISMINUYE LA VELOCIDAD A %lu\n", p_task_system_dta->speed);
-				                LOGGER_LOG("RESULTADO DE MODULO ENTRE %i y %i es %i", (int)p_task_system_dta->qty_packs, (int)p_task_system_dta->pack_rate, (int)p_task_system_dta->qty_packs % p_task_system_dta->pack_rate);
+				                LOGGER_LOG("RESULTADO DE MODULO ENTRE %i y %i es %i\n", (int)p_task_system_dta->qty_packs, (int)p_task_system_dta->pack_rate, (int)p_task_system_dta->qty_packs % (int)p_task_system_dta->pack_rate);
 				            }
 				        } else {
 				            LOGGER_LOG("SE ALCANZÓ EL LÍMITE DE PACKS (%lu), NO SE PUEDEN AGREGAR MÁS\n", DEL_SYST_MAX_PACKS);
@@ -233,15 +233,16 @@ void task_system_update(void *parameters) {
 				        p_task_system_dta->event = EV_NO_EVENT; // Consumir el evento
 				    }
 
-					if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->tick == p_task_system_dta->waiting_time
+					if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->tick >= p_task_system_dta->waiting_time
 							&& p_task_system_dta->qty_packs == DEL_SYST_MIN) {
 						LOGGER_LOG("NO HAY PACKS Y SE CUMPLIÓ EL TIEMPO DE ESPERA\n");
 						put_event_task_system(EV_SYST_CTRL_OFF);
 					}
 
-					else if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->qty_packs == DEL_SYST_MIN) {
+					else if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->qty_packs < p_task_system_dta->waiting_time) {
 						LOGGER_LOG("AUMENTA TIEMPO DE ESPERA SI NO HAY PACKS\n");
 						p_task_system_dta->tick++;
+						LOGGER_LOG("VALOR DEL TICK = %lu\n", p_task_system_dta->tick);
 					}
 
 				    if (EV_SYST_PACK_OUT == p_task_system_dta->event) {
@@ -256,7 +257,8 @@ void task_system_update(void *parameters) {
 				        } else {
 				            LOGGER_LOG("NO HAY MÁS PACKS PARA ELIMINAR\n");
 				        }
-				        p_task_system_dta->event = EV_NO_EVENT; // Consumir el evento
+				        if(p_task_system_dta->event != EV_SYST_NO_PACKS)
+				        	p_task_system_dta->event = EV_NO_EVENT; // Consumir el evento
 				    }
 
 					if (EV_SYST_SETUP_ON == p_task_system_dta->event) {
@@ -372,8 +374,10 @@ void task_system_update(void *parameters) {
 				    break;
 
 			}
-			p_task_system_dta->flag = false;
-			p_task_system_dta->event = EV_NO_EVENT;
+			if(p_task_system_dta->event != EV_SYST_NO_PACKS){
+				p_task_system_dta->flag = false;
+				p_task_system_dta->event = EV_NO_EVENT;
+			}
 		}
 
     }
