@@ -77,7 +77,7 @@
 //#define EV_NO_EVENT -1
 /********************** internal data declaration ****************************/
 task_system_dta_t task_system_dta =
-	{DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN_WAITING_TIME, DEL_SYST_MIN, ST_SYST_IDLE, ST_SETUP_INIT_MENU, EV_SYST_CTRL_OFF, false};
+	{DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN_WAITING_TIME, DEL_SYST_MIN, ST_SYST_IDLE, ST_SETUP_INIT_MENU, EV_SYST_CTRL_OFF, false, false};
 
 #define SYSTEM_DTA_QTY	(sizeof(task_system_dta)/sizeof(task_system_dta_t))
 
@@ -167,19 +167,24 @@ void task_system_update(void *parameters) {
 		}
 
         /* Fetch events */
-        if (true == any_event_task_system()) {
-            p_task_system_dta->flag = true;
-            p_task_system_dta->event = get_event_task_system();
-            LOGGER_LOG("Detected Event: %d, Flag: %s\n",
-                       p_task_system_dta->event,
-                       p_task_system_dta->flag ? "true" : "false");
-        }
+//        if (true == any_event_task_system()) {
+//            p_task_system_dta->flag = true;
+//            p_task_system_dta->event = get_event_task_system();
+//            LOGGER_LOG("Detected Event: %d, Flag: %s\n",
+//                       p_task_system_dta->event,
+//                       p_task_system_dta->flag ? "true" : "false");
+//        }
 
-		if (p_task_system_dta->flag && p_task_system_dta->event != EV_NO_EVENT) {
+
+		if ((p_task_system_dta->flag && p_task_system_dta->event != EV_NO_EVENT)) {
 
 			switch (p_task_system_dta->state) {
 
 				case ST_SYST_IDLE:
+
+					LOGGER_LOG("ESTADO ST_SYST_IDLE\n");
+
+					put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_CTRL_SYST_IDLE);
 
 					if (EV_SYST_CTRL_ON == p_task_system_dta->event) {
 						LOGGER_LOG("ENTRE AL SISTEMA DE CONTROL\n");
@@ -189,6 +194,11 @@ void task_system_update(void *parameters) {
 						p_task_system_dta->pack_rate = DEL_SYST_INIT_PCS;
 						p_task_system_dta->waiting_time = DEL_SYST_INIT_WAITING_TIME;
 						p_task_system_dta->tick = DEL_SYST_MIN;
+						p_task_system_dta->apagado_por_waiting_time = false;
+						put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
+						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_MIN_SPEED);
+						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_CTRL_SYST_IDLE);
+						put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
 					}
 
 					if (EV_SYST_SETUP_ON == p_task_system_dta->event) {
@@ -208,7 +218,8 @@ void task_system_update(void *parameters) {
 				case ST_SYST_CTRL:
 
 					LOGGER_LOG("BIENVENIDO AL SISTEMA DE CONTROL!\n");
-					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
+
+//					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
 					put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
 
 					if (p_task_system_dta->qty_packs == DEL_SYST_MIN)
@@ -220,6 +231,7 @@ void task_system_update(void *parameters) {
 				    if (EV_SYST_PACK_IN == p_task_system_dta->event) {
 				        if (p_task_system_dta->qty_packs < DEL_SYST_MAX_PACKS) {
 				            p_task_system_dta->qty_packs++;
+				        	put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_MIN_SPEED);
 				            LOGGER_LOG("AUMENTA LA CANTIDAD DE PACKS A %lu\n", p_task_system_dta->qty_packs);
 
 				            if (p_task_system_dta->speed > DEL_SYST_MIN_SPEED && ((int)p_task_system_dta->qty_packs % (int)p_task_system_dta->pack_rate == 0)) {
@@ -236,8 +248,9 @@ void task_system_update(void *parameters) {
 					if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->tick >= p_task_system_dta->waiting_time
 							&& p_task_system_dta->qty_packs == DEL_SYST_MIN) {
 						LOGGER_LOG("NO HAY PACKS Y SE CUMPLIÓ EL TIEMPO DE ESPERA\n");
-						put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_BUZZER);
+						p_task_system_dta->apagado_por_waiting_time = true;
 						put_event_task_system(EV_SYST_CTRL_OFF);
+						put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_BUZZER);
 					}
 
 					else if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->qty_packs < p_task_system_dta->waiting_time) {
@@ -249,6 +262,7 @@ void task_system_update(void *parameters) {
 				    if (EV_SYST_PACK_OUT == p_task_system_dta->event) {
 				        if (p_task_system_dta->qty_packs > DEL_SYST_MIN) {
 				            p_task_system_dta->qty_packs--;
+				        	put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_MAX_SPEED);
 				            LOGGER_LOG("DISMINUYE LA CANTIDAD DE PACKS A %lu\n", p_task_system_dta->qty_packs);
 
 				            if (p_task_system_dta->speed < DEL_SYST_MAX_SPEED && ((int)p_task_system_dta->qty_packs % (int)p_task_system_dta->pack_rate == 0)) {
@@ -270,20 +284,25 @@ void task_system_update(void *parameters) {
 					}
 
 					if (EV_SYST_CTRL_OFF == p_task_system_dta->event) {
-						LOGGER_LOG("SE APAGA EL SYST DE CONTROL\n");
-						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_CTRL_SYST);
-						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_CTRL_SYST);
 						p_task_system_dta->state = ST_SYST_IDLE;
 						p_task_system_dta->qty_packs = DEL_SYST_MIN;
 						p_task_system_dta->speed = DEL_SYST_MIN;
 						p_task_system_dta->pack_rate = DEL_SYST_MIN;
 						p_task_system_dta->waiting_time = DEL_SYST_MIN;
 						p_task_system_dta->tick = DEL_SYST_MIN;
+						put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_LED_CTRL_SYST);
+						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_CTRL_SYST_IDLE);
+						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_MAX_SPEED);
+						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_MIN_SPEED);
+						if(p_task_system_dta->apagado_por_waiting_time)
+							put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_BUZZER);
+						LOGGER_LOG("SE APAGA EL SYST DE CONTROL\n");
 					}
-
 					break;
 
 				case ST_SYST_SETUP:
+
+					LOGGER_LOG("ESTADO ST_SYST_SETUP\n");
 
 				    if (EV_SYST_SETUP_OFF == p_task_system_dta->event) {
 				        LOGGER_LOG("SE APAGA EL SISTEMA DE SETUP\n");
@@ -292,6 +311,7 @@ void task_system_update(void *parameters) {
 				        p_task_system_dta->option = 1;  // Restablece la opción predeterminada
 				        p_task_system_dta->event = EV_NO_EVENT;  // Consumir el evento
 				        p_task_system_dta->flag = false;  // Desactivar el flag
+				        put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
 				        return;  // Salir del estado actual
 				    }
 

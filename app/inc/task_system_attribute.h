@@ -103,6 +103,7 @@ typedef struct
 	task_system_composed_st_t	composed_state;
 	task_system_ev_t	event;
 	bool				flag;
+	bool				apagado_por_waiting_time;
 } task_system_dta_t;
 
 /********************** external data declaration ****************************/
