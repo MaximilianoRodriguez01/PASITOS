@@ -99,10 +99,25 @@ extern "C" {
 #define BTN_SETUP_ESCAPE_PRESSED		GPIO_PIN_RESET
 #define BTN_SETUP_ESCAPE_HOVER			GPIO_PIN_SET
 
-#define LED_A_PIN		LD2_Pin
-#define LED_A_PORT		LD2_GPIO_Port
-#define LED_A_ON		GPIO_PIN_SET
-#define LED_A_OFF		GPIO_PIN_RESET
+#define LED_MAX_SPEED_PIN				L1_Pin
+#define LED_MAX_SPEED_PORT				L1_GPIO_Port
+#define LED_MAX_SPEED_ON				GPIO_PIN_SET
+#define LED_MAX_SPEED_OFF				GPIO_PIN_RESET
+
+#define LED_MIN_SPEED_PIN				L2_Pin
+#define LED_MIN_SPEED_PORT				L2_GPIO_Port
+#define LED_MIN_SPEED_ON				GPIO_PIN_SET
+#define LED_MIN_SPEED_OFF				GPIO_PIN_RESET
+
+#define LED_CTRL_SYST_PIN				L3_Pin
+#define LED_CTRL_SYST_PORT				L3_GPIO_Port
+#define LED_CTRL_SYST_ON				GPIO_PIN_SET
+#define LED_CTRL_SYST_OFF				GPIO_PIN_RESET
+
+#define BUZZER_PIN						BZ_Pin
+#define BUZZER_PORT						BZ_GPIO_Port
+#define BUZZER_ON						GPIO_PIN_SET
+#define BUZZER_OFF						GPIO_PIN_RESET
 
 #endif/* STM32 Nucleo Boards - 144 Pins */
 
@@ -148,10 +163,25 @@ extern "C" {
 #define BTN_SETUP_ESCAPE_PRESSED		GPIO_PIN_RESET
 #define BTN_SETUP_ESCAPE_HOVER			GPIO_PIN_SET
 
-#define LED_A_PIN		LD2_Pin
-#define LED_A_PORT		LD2_GPIO_Port
-#define LED_A_ON		GPIO_PIN_SET
-#define LED_A_OFF		GPIO_PIN_RESET
+#define LED_MAX_SPEED_PIN				L1_Pin
+#define LED_MAX_SPEED_PORT				L1_GPIO_Port
+#define LED_MAX_SPEED_ON				GPIO_PIN_SET
+#define LED_MAX_SPEED_OFF				GPIO_PIN_RESET
+
+#define LED_MIN_SPEED_PIN				L2_Pin
+#define LED_MIN_SPEED_PORT				L2_GPIO_Port
+#define LED_MIN_SPEED_ON				GPIO_PIN_SET
+#define LED_MIN_SPEED_OFF				GPIO_PIN_RESET
+
+#define LED_CTRL_SYST_PIN				L3_Pin
+#define LED_CTRL_SYST_PORT				L3_GPIO_Port
+#define LED_CTRL_SYST_ON				GPIO_PIN_SET
+#define LED_CTRL_SYST_OFF				GPIO_PIN_RESET
+
+#define BUZZER_PIN						BZ_Pin
+#define BUZZER_PORT						BZ_GPIO_Port
+#define BUZZER_ON						GPIO_PIN_SET
+#define BUZZER_OFF						GPIO_PIN_RESET
 
 #endif
 
@@ -198,10 +228,25 @@ extern "C" {
 #define BTN_SETUP_ESCAPE_PRESSED		GPIO_PIN_RESET
 #define BTN_SETUP_ESCAPE_HOVER			GPIO_PIN_SET
 
-#define LED_A_PIN		LD2_Pin
-#define LED_A_PORT		LD2_GPIO_Port
-#define LED_A_ON		GPIO_PIN_SET
-#define LED_A_OFF		GPIO_PIN_RESET
+#define LED_MAX_SPEED_PIN				L1_Pin
+#define LED_MAX_SPEED_PORT				L1_GPIO_Port
+#define LED_MAX_SPEED_ON				GPIO_PIN_SET
+#define LED_MAX_SPEED_OFF				GPIO_PIN_RESET
+
+#define LED_MIN_SPEED_PIN				L2_Pin
+#define LED_MIN_SPEED_PORT				L2_GPIO_Port
+#define LED_MIN_SPEED_ON				GPIO_PIN_SET
+#define LED_MIN_SPEED_OFF				GPIO_PIN_RESET
+
+#define LED_CTRL_SYST_PIN				L3_Pin
+#define LED_CTRL_SYST_PORT				L3_GPIO_Port
+#define LED_CTRL_SYST_ON				GPIO_PIN_SET
+#define LED_CTRL_SYST_OFF				GPIO_PIN_RESET
+
+#define BUZZER_PIN						BZ_Pin
+#define BUZZER_PORT						BZ_GPIO_Port
+#define BUZZER_ON						GPIO_PIN_SET
+#define BUZZER_OFF						GPIO_PIN_RESET
 
 #endif
 

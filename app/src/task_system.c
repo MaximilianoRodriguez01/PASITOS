@@ -181,7 +181,6 @@ void task_system_update(void *parameters) {
 
 				case ST_SYST_IDLE:
 
-
 					if (EV_SYST_CTRL_ON == p_task_system_dta->event) {
 						LOGGER_LOG("ENTRE AL SISTEMA DE CONTROL\n");
 						p_task_system_dta->state = ST_SYST_CTRL;
@@ -209,13 +208,14 @@ void task_system_update(void *parameters) {
 				case ST_SYST_CTRL:
 
 					LOGGER_LOG("BIENVENIDO AL SISTEMA DE CONTROL!\n");
+					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
+					put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
 
-//
-//					if (p_task_system_dta->qty_packs == DEL_SYST_MIN)
-//						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_MIN_SPEED);
-//
-//					if (p_task_system_dta->qty_packs == DEL_SYST_MAX_PACKS)
-//						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_MAX_SPEED);
+					if (p_task_system_dta->qty_packs == DEL_SYST_MIN)
+						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_MIN_SPEED);
+
+					if (p_task_system_dta->qty_packs == DEL_SYST_MAX_PACKS)
+						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_MAX_SPEED);
 
 				    if (EV_SYST_PACK_IN == p_task_system_dta->event) {
 				        if (p_task_system_dta->qty_packs < DEL_SYST_MAX_PACKS) {
@@ -236,6 +236,7 @@ void task_system_update(void *parameters) {
 					if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->tick >= p_task_system_dta->waiting_time
 							&& p_task_system_dta->qty_packs == DEL_SYST_MIN) {
 						LOGGER_LOG("NO HAY PACKS Y SE CUMPLIÓ EL TIEMPO DE ESPERA\n");
+						put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_BUZZER);
 						put_event_task_system(EV_SYST_CTRL_OFF);
 					}
 
@@ -270,6 +271,8 @@ void task_system_update(void *parameters) {
 
 					if (EV_SYST_CTRL_OFF == p_task_system_dta->event) {
 						LOGGER_LOG("SE APAGA EL SYST DE CONTROL\n");
+						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_CTRL_SYST);
+						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_CTRL_SYST);
 						p_task_system_dta->state = ST_SYST_IDLE;
 						p_task_system_dta->qty_packs = DEL_SYST_MIN;
 						p_task_system_dta->speed = DEL_SYST_MIN;
