@@ -53,7 +53,7 @@
 #include "task_actuator_attribute.h"
 #include "task_actuator_interface.h"
 // #include "task_temperature.h"
-// #include "display.h"
+#include "display.h"
 
 /********************** macros and definitions *******************************/
 #define G_TASK_SYS_CNT_INI			0ul
@@ -128,7 +128,7 @@ void task_system_init(void *parameters) {
 
 	g_task_system_tick_cnt = G_TASK_SYS_TICK_CNT_INI;
 
-	//displayInit();
+	displayInit();
 }
 
 void task_system_update(void *parameters) {
@@ -175,12 +175,18 @@ void task_system_update(void *parameters) {
 //                       p_task_system_dta->flag ? "true" : "false");
 //        }
 
-
-		if ((p_task_system_dta->flag && p_task_system_dta->event != EV_NO_EVENT)) {
+		if ((p_task_system_dta->flag && p_task_system_dta->event != EV_NO_EVENT) || p_task_system_dta->event == EV_SYST_CTRL_OFF) {
 
 			switch (p_task_system_dta->state) {
 
 				case ST_SYST_IDLE:
+
+
+
+					displayCharPositionWrite(0, 0);
+					displayStringWrite("CONTROL SYST OFF");
+					displayCharPositionWrite(0, 1);
+					displayStringWrite("PRESS BUTTON 1  ");
 
 					LOGGER_LOG("ESTADO ST_SYST_IDLE\n");
 
@@ -199,6 +205,17 @@ void task_system_update(void *parameters) {
 						put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_MIN_SPEED);
 						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_CTRL_SYST_IDLE);
 						put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
+
+						displayCharPositionWrite(0, 0);
+						char str1[20];
+						snprintf(str1, sizeof(str1), "S:%i P:%i TE:   ", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs);
+						displayStringWrite(str1);
+
+						displayCharPositionWrite(0, 1);
+						char str2[20];
+						snprintf(str2, sizeof(str2), "T:%i R:%i TI:   ", (int)p_task_system_dta->waiting_time, (int)p_task_system_dta->pack_rate);
+						displayStringWrite(str2);
+
 					}
 
 					if (EV_SYST_SETUP_ON == p_task_system_dta->event) {
@@ -217,9 +234,10 @@ void task_system_update(void *parameters) {
 
 				case ST_SYST_CTRL:
 
+
 					LOGGER_LOG("BIENVENIDO AL SISTEMA DE CONTROL!\n");
 
-//					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
+					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
 					put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
 
 					if (p_task_system_dta->qty_packs == DEL_SYST_MIN)
@@ -270,7 +288,7 @@ void task_system_update(void *parameters) {
 				                LOGGER_LOG("AUMENTA LA VELOCIDAD A %lu\n", p_task_system_dta->speed);
 				            }
 				        } else {
-				            LOGGER_LOG("NO HAY MÁS PACKS PARA ELIMINAR\n");
+				        	LOGGER_LOG("NO HAY MÁS PACKS PARA ELIMINAR\n");
 				        }
 				        if(p_task_system_dta->event != EV_SYST_NO_PACKS)
 				        	p_task_system_dta->event = EV_NO_EVENT; // Consumir el evento
@@ -322,6 +340,14 @@ void task_system_update(void *parameters) {
 				            LOGGER_LOG("ESTOY EN EL MENU INICIAL DEL SETUP\n");
 				            LOGGER_LOG("EVENTO NRO %i\n", p_task_system_dta->event);
 
+				    		displayCharPositionWrite(0, 0);
+				    		displayStringWrite("PACKS-TIME (1-2)");
+
+				    		displayCharPositionWrite(0, 1);
+				    		char str_option[20];
+				    		snprintf(str_option, sizeof(str_option), "OPTION: %i       ", (int)p_task_system_dta->option);
+				    		displayStringWrite(str_option);
+
 				            if (EV_SETUP_NEXT == p_task_system_dta->event && p_task_system_dta->option == 1) {
 				                LOGGER_LOG("OPCION 2 INIT MENU\n");
 				                p_task_system_dta->option = 2;
@@ -352,6 +378,15 @@ void task_system_update(void *parameters) {
 				            break;
 
 				        case ST_SETUP_MENU_PACKS_LIM:
+
+				        	displayCharPositionWrite(0, 0);
+				        	displayStringWrite("SET PACK RATE   ");
+
+				        	displayCharPositionWrite(0, 1);
+				        	char str_pack_rate[20];
+				        	snprintf(str_pack_rate, sizeof(str_pack_rate), "LIM RATE: %i    ", (int)p_task_system_dta->pack_rate);
+				        	displayStringWrite(str_pack_rate);
+
 				            LOGGER_LOG("ESTOY EN EL MENU DEL PACKS LIM \n");
 
 				            if (EV_SETUP_NEXT == p_task_system_dta->event && p_task_system_dta->pack_rate < DEL_SYST_MAX_PACKS) {
@@ -374,6 +409,15 @@ void task_system_update(void *parameters) {
 				            break;
 
 				        case ST_SETUP_MENU_WAITING_TIME:
+
+				        	displayCharPositionWrite(0, 0);
+				        	displayStringWrite("SET WAITING TIME");
+
+				        	displayCharPositionWrite(0, 1);
+				        	char str_waiting_time[20];
+				        	snprintf(str_waiting_time, sizeof(str_waiting_time), "WAITING TIME: %i", (int)p_task_system_dta->pack_rate);
+				        	displayStringWrite(str_waiting_time);
+
 				            LOGGER_LOG("ESTOY EN EL MENU DEL WAITING TIME\n");
 
 				            if (EV_SETUP_NEXT == p_task_system_dta->event) {
@@ -387,7 +431,7 @@ void task_system_update(void *parameters) {
 				            }
 
 				            if (EV_SETUP_ESCAPE == p_task_system_dta->event) {
-				                LOGGER_LOG("VUELVO AL MENU INICIAL")
+				            	LOGGER_LOG("VUELVO AL MENU INICIAL")
 				                p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;
 				                p_task_system_dta->option = 1;
 				            }
