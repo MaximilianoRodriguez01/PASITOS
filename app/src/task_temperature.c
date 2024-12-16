@@ -66,7 +66,7 @@ static HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel
 
     sConfig.Channel = channel;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = (channel == ADC_CHANNEL_TEMPSENSOR) ? ADC_SAMPLETIME_71CYCLES_5 : ADC_SAMPLETIME_1CYCLE_5;
+    sConfig.SamplingTime = (channel == ADC_CHANNEL_TEMPSENSOR) ? ADC_SAMPLETIME_239CYCLES_5 : ADC_SAMPLETIME_1CYCLE_5;
 
     res = HAL_ADC_ConfigChannel(&hadc1, &sConfig);
     if (res != HAL_OK) {

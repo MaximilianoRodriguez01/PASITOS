@@ -166,6 +166,10 @@ void task_system_update(void *parameters) {
 //			p_task_system_dta->event = get_event_task_system();
 //		}
 
+//		float temp_ext = ADC_Ext_Temperature();
+//		displayCharPositionWrite(0, 0);
+//		char str1[20];
+
         /* Fetch events */
         if (true == any_event_task_system()) {
             p_task_system_dta->flag = true;
@@ -331,8 +335,6 @@ void task_system_update(void *parameters) {
 							put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_BUZZER);
 						LOGGER_LOG("SE APAGA EL SYST DE CONTROL\n");
 					}
-
-					p_task_system_dta->flag = false;
 
 					break;
 
