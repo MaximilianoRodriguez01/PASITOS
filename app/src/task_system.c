@@ -52,7 +52,7 @@
 #include "task_system_interface.h"
 #include "task_actuator_attribute.h"
 #include "task_actuator_interface.h"
-// #include "task_temperature.h"
+#include "task_temperature.h"
 #include "display.h"
 
 /********************** macros and definitions *******************************/
@@ -209,8 +209,6 @@ void task_system_update(void *parameters) {
 
 						p_task_system_dta->cambio_de_estado = true;
 
-
-
 					}
 
 					if (EV_SYST_SETUP_ON == p_task_system_dta->event) {
@@ -240,9 +238,10 @@ void task_system_update(void *parameters) {
 
 					LOGGER_LOG("BIENVENIDO AL SISTEMA DE CONTROL!\n");
 
+					float temp_ext = ADC_Temperature();
 					displayCharPositionWrite(0, 0);
 					char str1[20];
-					snprintf(str1, sizeof(str1), "S:%i P:%i TE:   ", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs);
+					snprintf(str1, sizeof(str1), "S:%i P:%i TE:%.1f", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs, temp_ext);
 					displayStringWrite(str1);
 
 					displayCharPositionWrite(0, 1);
