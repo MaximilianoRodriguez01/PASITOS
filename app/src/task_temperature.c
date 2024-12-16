@@ -11,12 +11,12 @@
 
 /********************** macros and definitions *******************************/
 
-#define V25 1.43
-#define AVG_SLOPE 0.0043
+#define V25 1.43F
+#define AVG_SLOPE 0.0043F
 
 /********************** internal functions declaration ***********************/
 
-HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value);
+HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel);
 
 /********************** external data declaration *****************************/
 
@@ -40,7 +40,7 @@ float ADC_Int_Temperature() {
     uint16_t value;
 
     if (HAL_OK == ADC_Poll_Read_Channel(&value, ADC_CHANNEL_TEMPSENSOR)) {
-        float temperature = ((((float)value * 0.456 * 3.3 / 4096.0) - V25) / AVG_SLOPE) + 25.0;
+        float temperature = ((((float)value * 3.3 / 4096.0) - V25) / AVG_SLOPE) + 25.0;
         return temperature;
     }
 
@@ -59,13 +59,13 @@ float ADC_Temperature(uint16_t value)
 /********************** internal functions definition ************************/
 
 //	Requests start of conversion, waits until conversion done
-static HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel)
+HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel)
 {
     HAL_StatusTypeDef res;
     ADC_ChannelConfTypeDef sConfig = {0};
 
     sConfig.Channel = channel;
-    sConfig.Rank = ADC_REGULAR_RANK_1;
+    sConfig.Rank = (channel == ADC_CHANNEL_TEMPSENSOR) ? ADC_REGULAR_RANK_2 : ADC_REGULAR_RANK_1;
     sConfig.SamplingTime = (channel == ADC_CHANNEL_TEMPSENSOR) ? ADC_SAMPLETIME_239CYCLES_5 : ADC_SAMPLETIME_1CYCLE_5;
 
     res = HAL_ADC_ConfigChannel(&hadc1, &sConfig);
@@ -73,6 +73,7 @@ static HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel
         return res;
     }
 
+    HAL_ADCEx_Calibration_Start(&hadc1);
     res = HAL_ADC_Start(&hadc1);
     if (HAL_OK == res) {
         res = HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
