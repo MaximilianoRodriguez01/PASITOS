@@ -16,7 +16,7 @@
 
 /********************** internal functions declaration ***********************/
 
-HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value);
+HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel);
 
 /********************** external data declaration *****************************/
 
@@ -28,8 +28,8 @@ float ADC_Ext_Temperature() {
 	uint16_t value;
 
 	if (HAL_OK == ADC_Poll_Read_Channel(&value, ADC_CHANNEL_1)) {
-		float temperature = ((float)value * 3.3 * 100.0) / 4096.0;
-    	return temperature;
+		value = (float)value * (50.0/4096.0);
+		return value;
 	}
 
 	LOGGER_LOG("ERROR TEMPERATURE");
@@ -37,11 +37,15 @@ float ADC_Ext_Temperature() {
 }
 
 float ADC_Int_Temperature() {
-    uint16_t value;
+    uint16_t raw;
 
-    if (HAL_OK == ADC_Poll_Read_Channel(&value, ADC_CHANNEL_TEMPSENSOR)) {
-        float temperature = ((((float)value * 3.3 / 4096.0) - V25) / AVG_SLOPE) + 25.0;
-        return temperature;
+
+    if (HAL_OK == ADC_Poll_Read_Channel(&raw, ADC_CHANNEL_TEMPSENSOR)) {
+//        float temperature = ((((float)value * 3.3 / 4096.0) - V25) / AVG_SLOPE) + 25.0;
+
+    	raw = raw*0.452;
+    	float value = ((float)raw-500.0)/10.0;
+    	return value;
     }
 
     LOGGER_LOG("ERROR LEYENDO TEMPERATURA INTERNA");
@@ -59,14 +63,14 @@ float ADC_Temperature(uint16_t value)
 /********************** internal functions definition ************************/
 
 //	Requests start of conversion, waits until conversion done
-static HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel)
+HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel)
 {
     HAL_StatusTypeDef res;
     ADC_ChannelConfTypeDef sConfig = {0};
 
     sConfig.Channel = channel;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_71CYCLES_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 
     res = HAL_ADC_ConfigChannel(&hadc1, &sConfig);
     if (res != HAL_OK) {
