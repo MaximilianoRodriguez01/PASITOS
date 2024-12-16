@@ -74,10 +74,10 @@
 
 
 
-//#define EV_NO_EVENT -1
+//#define EV_SYST_IDLE -1
 /********************** internal data declaration ****************************/
 task_system_dta_t task_system_dta =
-	{DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN_WAITING_TIME, DEL_SYST_MIN, ST_SYST_IDLE, ST_SETUP_INIT_MENU, EV_SYST_CTRL_OFF, false, false};
+	{DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN, DEL_SYST_MIN_WAITING_TIME, DEL_SYST_MIN, ST_SYST_IDLE, ST_SETUP_INIT_MENU, EV_SYST_IDLE, true, false, false};
 
 #define SYSTEM_DTA_QTY	(sizeof(task_system_dta)/sizeof(task_system_dta_t))
 
@@ -161,27 +161,28 @@ void task_system_update(void *parameters) {
     	/* Update Task System Data Pointer */
 		p_task_system_dta = &task_system_dta;
 
-		if (true == any_event_task_system()) {
-			p_task_system_dta->flag = true;
-			p_task_system_dta->event = get_event_task_system();
-		}
+//		if (true == any_event_task_system()) {
+//			p_task_system_dta->flag = true;
+//			p_task_system_dta->event = get_event_task_system();
+//		}
 
         /* Fetch events */
-//        if (true == any_event_task_system()) {
-//            p_task_system_dta->flag = true;
-//            p_task_system_dta->event = get_event_task_system();
-//            LOGGER_LOG("Detected Event: %d, Flag: %s\n",
-//                       p_task_system_dta->event,
-//                       p_task_system_dta->flag ? "true" : "false");
-//        }
+        if (true == any_event_task_system()) {
+            p_task_system_dta->flag = true;
+            p_task_system_dta->event = get_event_task_system();
+			LOGGER_LOG("Detected Event: %d, Flag: %s\n",
+		   p_task_system_dta->event,
+		   p_task_system_dta->flag ? "true" : "false");
+        }
 
-		if ((p_task_system_dta->flag && p_task_system_dta->event != EV_NO_EVENT) || p_task_system_dta->event == EV_SYST_CTRL_OFF) {
+		if (p_task_system_dta->flag || p_task_system_dta->cambio_de_estado){
 
 			switch (p_task_system_dta->state) {
 
 				case ST_SYST_IDLE:
 
-
+					if(p_task_system_dta->cambio_de_estado == true)
+						p_task_system_dta->cambio_de_estado = false;
 
 					displayCharPositionWrite(0, 0);
 					displayStringWrite("CONTROL SYST OFF");
@@ -193,7 +194,7 @@ void task_system_update(void *parameters) {
 					put_event_task_actuator(EV_LED_XX_TURN_ON, ID_LED_CTRL_SYST_IDLE);
 
 					if (EV_SYST_CTRL_ON == p_task_system_dta->event) {
-						LOGGER_LOG("ENTRE AL SISTEMA DE CONTROL\n");
+						LOGGER_LOG("PASANDO AL SISTEMA DE CONTROL\n");
 						p_task_system_dta->state = ST_SYST_CTRL;
 						p_task_system_dta->qty_packs = DEL_SYST_MIN;
 						p_task_system_dta->speed = DEL_SYST_INIT_SPEED;
@@ -206,20 +207,14 @@ void task_system_update(void *parameters) {
 						put_event_task_actuator(EV_LED_XX_TURN_OFF, ID_LED_CTRL_SYST_IDLE);
 						put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
 
-						displayCharPositionWrite(0, 0);
-						char str1[20];
-						snprintf(str1, sizeof(str1), "S:%i P:%i TE:   ", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs);
-						displayStringWrite(str1);
+						p_task_system_dta->cambio_de_estado = true;
 
-						displayCharPositionWrite(0, 1);
-						char str2[20];
-						snprintf(str2, sizeof(str2), "T:%i R:%i TI:   ", (int)p_task_system_dta->waiting_time, (int)p_task_system_dta->pack_rate);
-						displayStringWrite(str2);
+
 
 					}
 
 					if (EV_SYST_SETUP_ON == p_task_system_dta->event) {
-						LOGGER_LOG("ENTRE AL SETUP");
+						LOGGER_LOG("PASANDO AL SETUP");
 						p_task_system_dta->state = ST_SYST_SETUP;
 						p_task_system_dta->qty_packs = DEL_SYST_MIN;
 						p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;
@@ -228,14 +223,32 @@ void task_system_update(void *parameters) {
 						p_task_system_dta->waiting_time = DEL_SYST_INIT_WAITING_TIME;
 						p_task_system_dta->option = DEL_SYST_INIT_OPTION;
 						p_task_system_dta->tick = DEL_SYST_MIN;
+
+						p_task_system_dta->cambio_de_estado = true;
 					}
+
+//					if(cambio_de_estado == false)
+//						break;
 
 					break;
 
 				case ST_SYST_CTRL:
 
+					if(p_task_system_dta->cambio_de_estado == true)
+						p_task_system_dta->cambio_de_estado = false;
+
 
 					LOGGER_LOG("BIENVENIDO AL SISTEMA DE CONTROL!\n");
+
+					displayCharPositionWrite(0, 0);
+					char str1[20];
+					snprintf(str1, sizeof(str1), "S:%i P:%i TE:   ", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs);
+					displayStringWrite(str1);
+
+					displayCharPositionWrite(0, 1);
+					char str2[20];
+					snprintf(str2, sizeof(str2), "T:%i R:%i TI:   ", (int)p_task_system_dta->waiting_time, (int)p_task_system_dta->pack_rate);
+					displayStringWrite(str2);
 
 					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
 					put_event_task_actuator(EV_LED_XX_BLINKING_OFF, ID_BUZZER);
@@ -260,7 +273,7 @@ void task_system_update(void *parameters) {
 				        } else {
 				            LOGGER_LOG("SE ALCANZÓ EL LÍMITE DE PACKS (%lu), NO SE PUEDEN AGREGAR MÁS\n", DEL_SYST_MAX_PACKS);
 				        }
-				        p_task_system_dta->event = EV_NO_EVENT; // Consumir el evento
+				        p_task_system_dta->event = EV_SYST_IDLE; // Consumir el evento
 				    }
 
 					if (EV_SYST_NO_PACKS == p_task_system_dta->event && p_task_system_dta->tick >= p_task_system_dta->waiting_time
@@ -291,18 +304,20 @@ void task_system_update(void *parameters) {
 				        	LOGGER_LOG("NO HAY MÁS PACKS PARA ELIMINAR\n");
 				        }
 				        if(p_task_system_dta->event != EV_SYST_NO_PACKS)
-				        	p_task_system_dta->event = EV_NO_EVENT; // Consumir el evento
+				        	p_task_system_dta->event = EV_SYST_IDLE; // Consumir el evento
 				    }
 
 					if (EV_SYST_SETUP_ON == p_task_system_dta->event) {
-						LOGGER_LOG("ESTOY EN EL SETUP\n");
+						LOGGER_LOG("PASANDO AL SETUP\n");
 						p_task_system_dta->state = ST_SYST_SETUP;
+						p_task_system_dta->cambio_de_estado = true;
 						p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;
 						p_task_system_dta->option = 1;
 					}
 
 					if (EV_SYST_CTRL_OFF == p_task_system_dta->event) {
 						p_task_system_dta->state = ST_SYST_IDLE;
+						p_task_system_dta->cambio_de_estado = true;
 						p_task_system_dta->qty_packs = DEL_SYST_MIN;
 						p_task_system_dta->speed = DEL_SYST_MIN;
 						p_task_system_dta->pack_rate = DEL_SYST_MIN;
@@ -316,18 +331,25 @@ void task_system_update(void *parameters) {
 							put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_BUZZER);
 						LOGGER_LOG("SE APAGA EL SYST DE CONTROL\n");
 					}
+
+					p_task_system_dta->flag = false;
+
 					break;
 
 				case ST_SYST_SETUP:
 
+					if(p_task_system_dta->cambio_de_estado == true)
+						p_task_system_dta->cambio_de_estado = false;
+
 					LOGGER_LOG("ESTADO ST_SYST_SETUP\n");
 
 				    if (EV_SYST_SETUP_OFF == p_task_system_dta->event) {
-				        LOGGER_LOG("SE APAGA EL SISTEMA DE SETUP\n");
+				        LOGGER_LOG("APAGANDO EL SISTEMA DE SETUP\n");
 				        p_task_system_dta->state = ST_SYST_CTRL;  // Cambia al estado de control
+						p_task_system_dta->cambio_de_estado = true;
 				        p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;  // Reinicia el compuesto
 				        p_task_system_dta->option = 1;  // Restablece la opción predeterminada
-				        p_task_system_dta->event = EV_NO_EVENT;  // Consumir el evento
+				        p_task_system_dta->event = EV_SYST_IDLE;  // Consumir el evento
 				        p_task_system_dta->flag = false;  // Desactivar el flag
 				        put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);
 				        return;  // Salir del estado actual
@@ -337,6 +359,11 @@ void task_system_update(void *parameters) {
 
 
 				    	case ST_SETUP_INIT_MENU:
+
+							if(p_task_system_dta->cambio_de_estado == true)
+								p_task_system_dta->cambio_de_estado = false;
+
+
 				            LOGGER_LOG("ESTOY EN EL MENU INICIAL DEL SETUP\n");
 				            LOGGER_LOG("EVENTO NRO %i\n", p_task_system_dta->event);
 
@@ -351,33 +378,36 @@ void task_system_update(void *parameters) {
 				            if (EV_SETUP_NEXT == p_task_system_dta->event && p_task_system_dta->option == 1) {
 				                LOGGER_LOG("OPCION 2 INIT MENU\n");
 				                p_task_system_dta->option = 2;
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            } else if (EV_SETUP_NEXT == p_task_system_dta->event && p_task_system_dta->option == 2) {
 				                LOGGER_LOG("OPCION 1 INIT MENU\n");
 				                p_task_system_dta->option = 1;
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            }
 
 				            if (EV_SETUP_ENTER == p_task_system_dta->event && p_task_system_dta->option == 1) {
-				                LOGGER_LOG("MENU PACKS LIM\n");
+				                LOGGER_LOG("VIAJANDO AL MENU PACKS LIM\n");
 				                p_task_system_dta->composed_state = ST_SETUP_MENU_PACKS_LIM;
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            } else if (EV_SETUP_ENTER == p_task_system_dta->event && p_task_system_dta->option == 2) {
-				                LOGGER_LOG("MENU WAITING TIME\n");
+				                LOGGER_LOG("VIAJANDO AL MENU WAITING TIME\n");
 				                p_task_system_dta->composed_state = ST_SETUP_MENU_WAITING_TIME;
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            }
 
 				            if (EV_SETUP_ESCAPE == p_task_system_dta->event) {
-				                LOGGER_LOG("VUELVO AL MENU INICIAL\n");
+				                LOGGER_LOG("VOLVIENDO AL MENU INICIAL\n");
 				                p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;
 				                p_task_system_dta->option = 1;
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            }
 
 				            break;
 
 				        case ST_SETUP_MENU_PACKS_LIM:
+
+							if(p_task_system_dta->cambio_de_estado == true)
+								p_task_system_dta->cambio_de_estado = false;
 
 				        	displayCharPositionWrite(0, 0);
 				        	displayStringWrite("SET PACK RATE   ");
@@ -392,30 +422,34 @@ void task_system_update(void *parameters) {
 				            if (EV_SETUP_NEXT == p_task_system_dta->event && p_task_system_dta->pack_rate < DEL_SYST_MAX_PACKS) {
 				                p_task_system_dta->pack_rate++;
 				                LOGGER_LOG("VARIO EL PACK RATE %lu\n", p_task_system_dta->pack_rate);
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            } else if (EV_SETUP_NEXT == p_task_system_dta->event && p_task_system_dta->pack_rate == DEL_SYST_MAX_PACKS) {
 				                p_task_system_dta->pack_rate = 1;
 				                LOGGER_LOG("VUELVE A 1\n");
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            }
 
 				            if (EV_SETUP_ESCAPE == p_task_system_dta->event) {
-				                LOGGER_LOG("VUELVO AL MENU INICIAL");
+				                LOGGER_LOG("VOLVIENDO AL MENU INICIAL");
 				                p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;
 				                p_task_system_dta->option = 1;
-				                p_task_system_dta->event = EV_NO_EVENT;  // Consumir evento
+				                p_task_system_dta->event = EV_SYST_IDLE;  // Consumir evento
 				            }
 
 				            break;
 
 				        case ST_SETUP_MENU_WAITING_TIME:
 
+							if(p_task_system_dta->cambio_de_estado == true)
+								p_task_system_dta->cambio_de_estado = false;
+
+
 				        	displayCharPositionWrite(0, 0);
 				        	displayStringWrite("SET WAITING TIME");
 
 				        	displayCharPositionWrite(0, 1);
 				        	char str_waiting_time[20];
-				        	snprintf(str_waiting_time, sizeof(str_waiting_time), "WAITING TIME: %i", (int)p_task_system_dta->pack_rate);
+				        	snprintf(str_waiting_time, sizeof(str_waiting_time), "WAITING TIME: %i", (int)p_task_system_dta->waiting_time);
 				        	displayStringWrite(str_waiting_time);
 
 				            LOGGER_LOG("ESTOY EN EL MENU DEL WAITING TIME\n");
@@ -431,7 +465,7 @@ void task_system_update(void *parameters) {
 				            }
 
 				            if (EV_SETUP_ESCAPE == p_task_system_dta->event) {
-				            	LOGGER_LOG("VUELVO AL MENU INICIAL")
+				            	LOGGER_LOG("VOLVIENDO AL MENU INICIAL")
 				                p_task_system_dta->composed_state = ST_SETUP_INIT_MENU;
 				                p_task_system_dta->option = 1;
 				            }
@@ -443,7 +477,7 @@ void task_system_update(void *parameters) {
 			}
 			if(p_task_system_dta->event != EV_SYST_NO_PACKS){
 				p_task_system_dta->flag = false;
-				p_task_system_dta->event = EV_NO_EVENT;
+				p_task_system_dta->event = EV_SYST_IDLE;
 			}
 		}
 

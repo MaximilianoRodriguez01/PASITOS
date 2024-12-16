@@ -104,6 +104,7 @@ typedef struct
 	task_system_ev_t	event;
 	bool				flag;
 	bool				apagado_por_waiting_time;
+	bool				cambio_de_estado;
 } task_system_dta_t;
 
 /********************** external data declaration ****************************/
