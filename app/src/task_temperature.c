@@ -40,7 +40,7 @@ float ADC_Int_Temperature() {
     uint16_t value;
 
     if (HAL_OK == ADC_Poll_Read_Channel(&value, ADC_CHANNEL_TEMPSENSOR)) {
-        float temperature = ((((float)value * 3.3 / 4096.0) - V25) / AVG_SLOPE) + 25.0;
+        float temperature = ((V25 - ((float)value * 3.3 / 4096.0)) / AVG_SLOPE) + 25.0;
         return temperature;
     }
 
@@ -73,7 +73,6 @@ HAL_StatusTypeDef ADC_Poll_Read_Channel(uint16_t *value, uint32_t channel)
         return res;
     }
 
-    HAL_ADCEx_Calibration_Start(&hadc1);
     res = HAL_ADC_Start(&hadc1);
     if (HAL_OK == res) {
         res = HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
