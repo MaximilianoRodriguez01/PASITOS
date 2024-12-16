@@ -238,15 +238,16 @@ void task_system_update(void *parameters) {
 
 					LOGGER_LOG("BIENVENIDO AL SISTEMA DE CONTROL!\n");
 
-					float temp_ext = ADC_Temperature();
+					float temp_ext = ADC_Ext_Temperature();
 					displayCharPositionWrite(0, 0);
 					char str1[20];
 					snprintf(str1, sizeof(str1), "S:%i P:%i TE:%.1f", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs, temp_ext);
 					displayStringWrite(str1);
 
+					float temp_int = ADC_Int_Temperature();
 					displayCharPositionWrite(0, 1);
 					char str2[20];
-					snprintf(str2, sizeof(str2), "T:%i R:%i TI:   ", (int)p_task_system_dta->waiting_time, (int)p_task_system_dta->pack_rate);
+					snprintf(str2, sizeof(str2), "T:%i R:%i TI:%.1f", (int)p_task_system_dta->waiting_time, (int)p_task_system_dta->pack_rate, temp_int);
 					displayStringWrite(str2);
 
 					put_event_task_actuator(EV_LED_XX_BLINKING_ON, ID_LED_CTRL_SYST);

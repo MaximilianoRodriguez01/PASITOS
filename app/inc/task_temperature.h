@@ -55,7 +55,8 @@ extern "C" {
 
 /********************** external functions declaration ***********************/
 
-float ADC_Temperature();
+float ADC_Int_Temperature();
+float ADC_Ext_Temperature();
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
