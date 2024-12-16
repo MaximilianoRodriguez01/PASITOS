@@ -179,6 +179,20 @@ void task_system_update(void *parameters) {
 		   p_task_system_dta->flag ? "true" : "false");
         }
 
+//		float temp_ext = ADC_Ext_Temperature();
+//		displayCharPositionWrite(0, 0);
+//		char str1[20];
+//		snprintf(str1, sizeof(str1), "S:%i P:%i TE:%.1f", (int)p_task_system_dta->speed, (int)p_task_system_dta->qty_packs, temp_ext);
+//		displayStringWrite(str1);
+//
+//		float temp_int = ADC_Int_Temperature();
+//		displayCharPositionWrite(0, 1);
+//		char str2[20];
+//		snprintf(str2, sizeof(str2), "T:%i R:%i TI:%.1f", (int)p_task_system_dta->waiting_time, (int)p_task_system_dta->pack_rate, temp_int);
+//		displayStringWrite(str2);
+
+
+
 		if (p_task_system_dta->flag || p_task_system_dta->cambio_de_estado){
 
 			switch (p_task_system_dta->state) {
@@ -231,6 +245,8 @@ void task_system_update(void *parameters) {
 
 //					if(cambio_de_estado == false)
 //						break;
+
+					p_task_system_dta->flag = false;
 
 					break;
 

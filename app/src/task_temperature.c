@@ -28,7 +28,7 @@ float ADC_Ext_Temperature() {
 	uint16_t value;
 
 	if (HAL_OK == ADC_Poll_Read_Channel(&value, ADC_CHANNEL_1)) {
-		float temperature = ((float)value * 0.456 * 3.3 * 100.0) / 4096.0;
+		float temperature = ((float)value * 0.100 * 5 * 100.0) / 4096.0;
     	return temperature;
 	}
 
