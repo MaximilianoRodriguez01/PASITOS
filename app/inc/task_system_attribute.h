@@ -65,20 +65,17 @@ extern "C" {
 
 
 /* Events to excite Task System */
-typedef enum task_system_ev {
-    EV_SYST_IDLE,
-    EV_SYST_CTRL_ON,
-    EV_SYST_CTRL_OFF,
-    EV_SYST_PACK_IN,
-    EV_SYST_PACK_OUT,
-    EV_SYST_NO_PACKS,
-    EV_SYST_SETUP_ON,
-    EV_SYST_SETUP_OFF,
-    EV_SETUP_ENTER,
-    EV_SETUP_ESCAPE,
-    EV_SETUP_NEXT,
-    EV_NO_EVENT  // Evento neutro
-} task_system_ev_t;
+typedef enum task_system_ev {EV_SYST_IDLE,
+							 EV_SYST_CTRL_ON,
+							 EV_SYST_CTRL_OFF,
+							 EV_SYST_PACK_IN,
+							 EV_SYST_PACK_OUT,
+							 EV_SYST_NO_PACKS,
+							 EV_SYST_SETUP_ON,
+							 EV_SYST_SETUP_OFF,
+							 EV_SETUP_ENTER,
+							 EV_SETUP_ESCAPE,
+							 EV_SETUP_NEXT} task_system_ev_t;
 
 
 /* State of Task System */
