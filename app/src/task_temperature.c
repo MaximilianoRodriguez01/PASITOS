@@ -25,7 +25,7 @@ float ADC_Ext_Temperature() {
         return temperature;
     }
 
-    LOGGER_LOG("ERROR: Lectura de temperatura externa fallida");
+    LOGGER_LOG("ERROR: Lectura de temperatura externa fallida\n");
     return ERROR;
 }
 
@@ -37,7 +37,7 @@ float ADC_Int_Temperature() {
         return temperature;
     }
 
-    LOGGER_LOG("ERROR: Lectura de temperatura interna fallida");
+    LOGGER_LOG("ERROR: Lectura de temperatura interna fallida\n");
     return ERROR;
 }
 
@@ -53,7 +53,7 @@ HAL_StatusTypeDef ADC_Read_Value(ADC_HandleTypeDef *hadc, uint16_t *value, uint3
 
     res = HAL_ADC_ConfigChannel(hadc, &sConfig);
     if (res != HAL_OK) {
-        LOGGER_LOG("ERROR: Configuración de canal ADC fallida");
+        LOGGER_LOG("ERROR: Configuración de canal ADC fallida\n");
         return res;
     }
 
@@ -62,12 +62,12 @@ HAL_StatusTypeDef ADC_Read_Value(ADC_HandleTypeDef *hadc, uint16_t *value, uint3
         res = HAL_ADC_PollForConversion(hadc, HAL_MAX_DELAY);
         if (res == HAL_OK) {
             *value = HAL_ADC_GetValue(hadc);
-            LOGGER_LOG("ADC Value: %u", *value); // Log para depuración
+            LOGGER_LOG("ADC Value: %u\n", *value); // Log para depuración
         } else {
-            LOGGER_LOG("ERROR: Fallo en conversión ADC");
+            LOGGER_LOG("ERROR: Fallo en conversión ADC\n");
         }
     } else {
-        LOGGER_LOG("ERROR: Fallo al iniciar ADC");
+        LOGGER_LOG("ERROR: Fallo al iniciar ADC\n");
     }
     HAL_ADC_Stop(hadc);
     return res;
