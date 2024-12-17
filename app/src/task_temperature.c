@@ -21,7 +21,7 @@ float ADC_Ext_Temperature() {
     uint16_t value;
 
     if (HAL_OK == ADC_Read_Value(&hadc2, &value, ADC_CHANNEL_1)) {
-        float temperature = ((float)value * 0.100 * 5 * 100.0) / 4096.0;
+        float temperature = ((float)value * 0.452 * 5 * 100.0) / 4096.0;
         return temperature;
     }
 
@@ -49,10 +49,11 @@ HAL_StatusTypeDef ADC_Read_Value(ADC_HandleTypeDef *hadc, uint16_t *value, uint3
 
     sConfig.Channel = channel;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = channel == ADC_CHANNEL_1? ADC_SAMPLETIME_1CYCLE_5 : ADC_SAMPLETIME_239CYCLES_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_71CYCLES_5; // Cambiado a un tiempo de muestreo más largo
 
     res = HAL_ADC_ConfigChannel(hadc, &sConfig);
     if (res != HAL_OK) {
+        LOGGER_LOG("ERROR: Configuración de canal ADC fallida");
         return res;
     }
 
@@ -61,7 +62,12 @@ HAL_StatusTypeDef ADC_Read_Value(ADC_HandleTypeDef *hadc, uint16_t *value, uint3
         res = HAL_ADC_PollForConversion(hadc, HAL_MAX_DELAY);
         if (res == HAL_OK) {
             *value = HAL_ADC_GetValue(hadc);
+            LOGGER_LOG("ADC Value: %u", *value); // Log para depuración
+        } else {
+            LOGGER_LOG("ERROR: Fallo en conversión ADC");
         }
+    } else {
+        LOGGER_LOG("ERROR: Fallo al iniciar ADC");
     }
     HAL_ADC_Stop(hadc);
     return res;
