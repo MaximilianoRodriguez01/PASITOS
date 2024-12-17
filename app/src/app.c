@@ -121,42 +121,57 @@ void app_init(void)
 	cycle_counter_init();
 }
 
-void app_update(void)
-{
-	uint32_t index;
-	uint32_t cycle_counter;
-	uint32_t cycle_counter_time_us;
+void logWCET(void) {
+    uint32_t index;
 
-	/* Check if it's time to run tasks */
-	if (G_APP_TICK_CNT_INI < g_app_tick_cnt)
-    {
-    	g_app_tick_cnt--;
+    LOGGER_LOG("Logging WCET values:\r\n");
 
-    	/* Update App Counter */
-    	g_app_cnt++;
-    	g_app_time_us = 0;
+    for (index = 0; index < TASK_QTY; index++) {
+        LOGGER_LOG("  Task %lu WCET: %lu us\r\n", index, task_dta_list[index].WCET);
+    }
 
-    	/* Go through the task arrays */
-    	for (index = 0; TASK_QTY > index; index++)
-    	{
-			//HAL_GPIO_TogglePin(LED_A_PORT, LED_A_PIN);
-			cycle_counter_reset();
+    LOGGER_LOG("\r\n");  // Línea en blanco para separar registros
+}
 
-    		/* Run task_x_update */
-			(*task_cfg_list[index].task_update)(task_cfg_list[index].parameters);
 
-			cycle_counter = cycle_counter_get();
-			cycle_counter_time_us = cycle_counter_time_us();
-			//HAL_GPIO_TogglePin(LED_A_PORT, LED_A_PIN);
 
-			/* Update variables */
-	    	g_app_time_us += cycle_counter_time_us;
+void app_update(void) {
+    uint32_t index;
+    uint32_t cycle_counter;
+    uint32_t cycle_counter_time_us;
+    static uint32_t log_counter = 0;  // Contador para registro periódico
 
-			if (task_dta_list[index].WCET < cycle_counter_time_us)
-			{
-				task_dta_list[index].WCET = cycle_counter_time_us;
-			}
-	    }
+    /* Check if it's time to run tasks */
+    if (G_APP_TICK_CNT_INI < g_app_tick_cnt) {
+        g_app_tick_cnt--;
+
+        /* Update App Counter */
+        g_app_cnt++;
+        g_app_time_us = 0;
+
+        /* Go through the task arrays */
+        for (index = 0; TASK_QTY > index; index++) {
+            cycle_counter_reset();
+
+            /* Run task_x_update */
+            (*task_cfg_list[index].task_update)(task_cfg_list[index].parameters);
+
+            cycle_counter = cycle_counter_get();
+            cycle_counter_time_us = cycle_counter_time_us();
+
+            /* Update variables */
+            g_app_time_us += cycle_counter_time_us;
+
+            if (task_dta_list[index].WCET < cycle_counter_time_us) {
+                task_dta_list[index].WCET = cycle_counter_time_us;
+            }
+        }
+
+        /* Incrementa el contador de logs y verifica si es momento de registrar */
+        if (++log_counter >= 10000) {  // Registrar cada 10 ciclos
+            logWCET();              // Llama a la función que imprime los WCET
+            log_counter = 0;        // Reinicia el contador
+        }
     }
 }
 
