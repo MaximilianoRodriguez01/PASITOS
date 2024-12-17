@@ -20,7 +20,7 @@ HAL_StatusTypeDef ADC_Read_Value(ADC_HandleTypeDef *hadc, uint16_t *value, uint3
 float ADC_Ext_Temperature() {
     uint16_t value;
 
-    if (HAL_OK == ADC_Read_Value(&hadc2, &value, ADC_CHANNEL_TEMPSENSOR)) {
+    if (HAL_OK == ADC_Read_Value(&hadc2, &value, ADC_CHANNEL_1)) {
         float temperature = ((float)value * 0.100 * 5 * 100.0) / 4096.0;
         return temperature;
     }
@@ -32,8 +32,8 @@ float ADC_Ext_Temperature() {
 float ADC_Int_Temperature() {
     uint16_t value;
 
-    if (HAL_OK == ADC_Read_Value(&hadc1, &value, ADC_CHANNEL_1)) {
-        float temperature = ((V25 - ((float)value * 3.3 / 4096.0)) / AVG_SLOPE) + 25.0;
+    if (HAL_OK == ADC_Read_Value(&hadc1, &value, ADC_CHANNEL_TEMPSENSOR)) {
+        float temperature = 357.558 - 0.187364 * value;
         return temperature;
     }
 
