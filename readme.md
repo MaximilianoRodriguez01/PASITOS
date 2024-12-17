@@ -72,11 +72,6 @@ Project for STM32 Project (STM32CubeIDE Version: 1.7.0)
    - Connect the STM32 board via an ST-Link debugger.
    - Select **Run > Debug** or **Run > Run As > STM32 Cortex-M C/C++ Application** to flash the binary.
 
-5. **Testing**:
-   - Open a serial terminal (e.g., PuTTY, Tera Term) to monitor the retargeted `printf` console output.
-   - Baud rate: **115200**.
-   - Verify the execution times and task switching as per system modeling.
-
 ---
 
 ## Special Connection Requirements:
