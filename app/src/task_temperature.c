@@ -62,7 +62,6 @@ HAL_StatusTypeDef ADC_Read_Value(ADC_HandleTypeDef *hadc, uint16_t *value, uint3
         res = HAL_ADC_PollForConversion(hadc, HAL_MAX_DELAY);
         if (res == HAL_OK) {
             *value = HAL_ADC_GetValue(hadc);
-            LOGGER_LOG("ADC Value: %u\n", *value); // Log para depuración
         } else {
             LOGGER_LOG("ERROR: Fallo en conversión ADC\n");
         }

@@ -105,6 +105,7 @@ void app_init(void)
 
 	g_app_cnt = G_APP_CNT_INI;
 
+
 	/* Print out: Application execution counter */
 	LOGGER_LOG(" %s = %d\r\n", GET_NAME(g_app_cnt), (int)g_app_cnt);
 
@@ -119,6 +120,9 @@ void app_init(void)
 	}
 
 	cycle_counter_init();
+
+	g_app_tick_cnt = G_APP_TICK_CNT_INI;
+
 }
 
 void logWCET(void) {
@@ -166,12 +170,13 @@ void app_update(void) {
                 task_dta_list[index].WCET = cycle_counter_time_us;
             }
         }
-
-        /* Incrementa el contador de logs y verifica si es momento de registrar */
-        if (++log_counter >= 10000) {  // Registrar cada 10 ciclos
-            logWCET();              // Llama a la función que imprime los WCET
-            log_counter = 0;        // Reinicia el contador
-        }
+//        /* Incrementa el contador de logs y verifica si es momento de registrar */
+//        if (++log_counter >= 10000) {  // Registrar cada 10 ciclos
+//            logWCET();              // Llama a la función que imprime los WCET
+//            log_counter = 0;// Reinicia el contador
+//        }
+//
+//        LOGGER_LOG("Cycles: %lu - Time %lu uS\r\n", cycle_counter, cycle_counter_time_us);
     }
 }
 
