@@ -74,12 +74,6 @@ Project for STM32 Project (STM32CubeIDE Version: 1.7.0)
 
 ---
 
-## Special Connection Requirements:
-- No special hardware connections are required for this example.  
-- Ensure the onboard LEDs and serial UART (USART2) are correctly mapped.
-
----
-
 ## References:
 - **STM32 Step-by-Step Guide**:  
   [Getting Started with STM32](https://wiki.st.com/stm32mcu/wiki/STM32StepByStep:Getting_started_with_STM32_:_STM32_step_by_step)  
